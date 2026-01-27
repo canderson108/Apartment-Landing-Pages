@@ -261,48 +261,77 @@ const App: React.FC = () => {
                   Avoid move-in fees and secure discounted resident rates. We notify your leasing office the moment you enroll.
                 </p>
 
-                <div className="max-w-4xl mx-auto relative" ref={suggestionRef}>
-                  <form 
-                    onSubmit={handleSearch} 
-                    className="flex flex-col md:flex-row items-stretch gap-0 bg-white p-2 rounded-2xl shadow-2xl relative z-30"
-                  >
-                    <div className="flex-grow flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100" role="combobox" aria-expanded={showSuggestions} aria-haspopup="listbox" aria-owns="property-suggestions-listbox">
-                      <Search className="text-gray-400 mr-5 flex-shrink-0" size={24} />
-                      <input 
-                        type="text"
-                        autoComplete="off"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
-                        onKeyDown={handleKeyDown}
-                        aria-autocomplete="list"
-                        aria-controls="property-suggestions-listbox"
-                        aria-activedescendant={activeSuggestionIndex >= 0 ? `suggestion-${activeSuggestionIndex}` : undefined}
-                        placeholder="Property Name or Address..."
-                        className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
-                      />
-                    </div>
-                    <div className="w-full md:w-36 flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100">
-                      <Home className="text-gray-400 mr-5 flex-shrink-0" size={24} />
-                      <input 
-                        ref={unitInputRef}
-                        type="text"
-                        value={unitQuery}
-                        onChange={(e) => setUnitQuery(e.target.value)}
-                        placeholder="Unit"
-                        className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
-                      />
-                    </div>
-                    <button 
-                      disabled={isSearching}
-                      className="w-full md:w-auto px-12 py-5 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                      style={{ backgroundColor: activePrimary }}
+                <div className="max-w-4xl mx-auto" ref={suggestionRef}>
+                  <div className="relative z-50">
+                    <form 
+                      onSubmit={handleSearch} 
+                      className="flex flex-col md:flex-row items-stretch gap-0 bg-white p-2 rounded-2xl shadow-2xl relative z-30 overflow-hidden"
                     >
-                      {isSearching ? '...' : 'Enroll Now'}
-                    </button>
-                  </form>
+                      <div className="flex-grow flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100" role="combobox" aria-expanded={showSuggestions} aria-haspopup="listbox" aria-owns="property-suggestions-listbox">
+                        <Search className="text-gray-400 mr-5 flex-shrink-0" size={24} />
+                        <input 
+                          type="text"
+                          autoComplete="off"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
+                          onKeyDown={handleKeyDown}
+                          aria-autocomplete="list"
+                          aria-controls="property-suggestions-listbox"
+                          aria-activedescendant={activeSuggestionIndex >= 0 ? `suggestion-${activeSuggestionIndex}` : undefined}
+                          placeholder="Property Name or Address..."
+                          className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
+                        />
+                      </div>
+                      <div className="w-full md:w-36 flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100">
+                        <Home className="text-gray-400 mr-5 flex-shrink-0" size={24} />
+                        <input 
+                          ref={unitInputRef}
+                          type="text"
+                          value={unitQuery}
+                          onChange={(e) => setUnitQuery(e.target.value)}
+                          placeholder="Unit"
+                          className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
+                        />
+                      </div>
+                      <button 
+                        disabled={isSearching}
+                        className="w-full md:w-auto px-12 py-5 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        style={{ backgroundColor: activePrimary }}
+                      >
+                        {isSearching ? '...' : 'Enroll Now'}
+                      </button>
+                    </form>
 
-                  {/* NO-PENALTY ADVOCACY ALERT - High visibility, well spaced */}
+                    {/* Autocomplete Suggestions anchored directly to form */}
+                    {showSuggestions && (
+                      <div 
+                        id="property-suggestions-listbox"
+                        role="listbox"
+                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] text-left animate-in fade-in slide-in-from-top-2"
+                      >
+                        {suggestions.map((p, index) => (
+                          <button
+                            key={p.id}
+                            id={`suggestion-${index}`}
+                            role="option"
+                            aria-selected={index === activeSuggestionIndex}
+                            onClick={() => handleSelectSuggestion(p)}
+                            className={`w-full flex items-center gap-5 px-8 py-5 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${index === activeSuggestionIndex ? 'bg-gray-100' : ''}`}
+                          >
+                            <MapPin size={20} className="text-gray-300" />
+                            <div>
+                              <p className="font-bold text-[#1a2a44] text-lg">{p.name}</p>
+                              <p className="text-sm text-gray-400 font-medium">{p.address}</p>
+                            </div>
+                            <ChevronRight size={20} className="ml-auto text-gray-200" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* NO-PENALTY ADVOCACY ALERT - Positioned below the anchored search logic */}
                   <div className="mt-16 flex flex-col items-center animate-in fade-in slide-in-from-top-6 duration-1000">
                     <div className="inline-flex flex-col md:flex-row items-center gap-6 px-10 py-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl max-w-3xl mb-6">
                       <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 border border-white/20">
@@ -332,33 +361,6 @@ const App: React.FC = () => {
                       </p>
                     </div>
                   </div>
-
-                  {/* Autocomplete Suggestions */}
-                  {showSuggestions && (
-                    <div 
-                      id="property-suggestions-listbox"
-                      role="listbox"
-                      className="absolute top-full left-0 right-0 mt-4 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-40 text-left"
-                    >
-                      {suggestions.map((p, index) => (
-                        <button
-                          key={p.id}
-                          id={`suggestion-${index}`}
-                          role="option"
-                          aria-selected={index === activeSuggestionIndex}
-                          onClick={() => handleSelectSuggestion(p)}
-                          className={`w-full flex items-center gap-5 px-8 py-5 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${index === activeSuggestionIndex ? 'bg-gray-100' : ''}`}
-                        >
-                          <MapPin size={20} className="text-gray-300" />
-                          <div>
-                            <p className="font-bold text-[#1a2a44] text-lg">{p.name}</p>
-                            <p className="text-sm text-gray-400 font-medium">{p.address}</p>
-                          </div>
-                          <ChevronRight size={20} className="ml-auto text-gray-200" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

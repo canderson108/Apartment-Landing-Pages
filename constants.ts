@@ -1,3 +1,4 @@
+
 import { Property, ElectricityPlan } from './types';
 
 export const SUMMIT_PROPERTIES: Property[] = [
@@ -497,7 +498,6 @@ export const PLANS: ElectricityPlan[] = [
     features: [
       'Summit Compliance Verified',
       'Move-in Fees Waived Automatically',
-      'No Deposit for Approved Residents',
       'Official Property Syncing'
     ]
   },
