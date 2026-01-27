@@ -5,6 +5,7 @@ import PropertyHeader from './components/PropertyHeader';
 import PlanCard from './components/PlanCard';
 import EnrollmentForm from './components/EnrollmentForm';
 import ResidentInsights from './components/ResidentInsights';
+import { SummitFullLogo, GetElectricityLogo } from './components/Logos';
 import { 
   ChevronRight, 
   ShieldCheck, 
@@ -12,18 +13,92 @@ import {
   ArrowLeft, 
   Sparkles,
   CheckCircle2,
-  AlertCircle,
   Search,
   Zap,
   Home,
   Lock,
   MapPin,
-  Scale
+  Scale,
+  Eye,
+  X,
+  Check
 } from 'lucide-react';
 import { analyzeUtilityBill } from './services/geminiService';
 
+const QuickViewModal: React.FC<{ property: Property; onClose: () => void; onSelect: () => void }> = ({ property, onClose, onSelect }) => {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-[#1a2a44]/80 backdrop-blur-md" onClick={onClose}></div>
+      <div className="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-3xl overflow-hidden relative z-10 flex flex-col md:flex-row animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 z-20 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all group"
+        >
+          <X size={20} className="text-[#1a2a44] group-hover:rotate-90 transition-transform" />
+        </button>
+
+        <div className="w-full md:w-1/2 h-64 md:h-auto overflow-hidden">
+          <img src={property.image} alt={property.name} className="w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-1000" />
+        </div>
+
+        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col">
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#c5a059]/10 text-[#c5a059] text-[10px] font-black uppercase tracking-widest mb-4">
+              <ShieldCheck size={14} />
+              Summit Managed Community
+            </div>
+            <h2 className="text-4xl font-black serif text-[#1a2a44] mb-3 leading-tight">{property.name}</h2>
+            <div className="flex items-start gap-2 text-gray-400">
+              <MapPin size={16} className="mt-1 flex-shrink-0" />
+              <p className="text-sm font-medium leading-relaxed">{property.address}</p>
+            </div>
+          </div>
+
+          <div className="flex-grow">
+            <p className="text-gray-500 leading-relaxed mb-8 italic font-light text-lg">
+              "{property.description || 'Experience luxury living redefined with premium finishes and unmatched resident services.'}"
+            </p>
+
+            <div className="mb-10">
+              <h4 className="text-[11px] font-black uppercase tracking-widest text-[#1a2a44] mb-6 border-b border-gray-100 pb-2">Community Amenities</h4>
+              <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+                {(property.amenities || ['Resort Pool', 'Fitness Center', 'Private Patios', 'Pet Park']).map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                    <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                      <Check size={12} className="text-emerald-500" />
+                    </div>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-gray-100 mt-auto">
+            <button 
+              onClick={() => {
+                onSelect();
+                onClose();
+              }}
+              className="w-full py-5 rounded-xl text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+              style={{ backgroundColor: property.primaryColor }}
+            >
+              Enroll in Electricity
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
-  // Filter properties that have images available
   const availableProperties = useMemo(() => 
     SUMMIT_PROPERTIES.filter(p => p.image && p.image.trim() !== ''),
     []
@@ -38,6 +113,7 @@ const App: React.FC = () => {
   const [unitQuery, setUnitQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [quickViewProperty, setQuickViewProperty] = useState<Property | null>(null);
   
   const [suggestions, setSuggestions] = useState<Property[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -45,7 +121,6 @@ const App: React.FC = () => {
   const suggestionRef = useRef<HTMLDivElement>(null);
   const unitInputRef = useRef<HTMLInputElement>(null);
 
-  // Derived colors based on selected property or defaults
   const activePrimary = property?.primaryColor || '#1a2a44';
   const activeAccent = property?.accentColor || '#c5a059';
 
@@ -108,7 +183,9 @@ const App: React.FC = () => {
   const handleSelectSuggestion = (p: Property) => {
     setSearchQuery(p.name);
     setShowSuggestions(false);
-    unitInputRef.current?.focus();
+    setActiveSuggestionIndex(-1);
+    // Focus the unit input after selection
+    setTimeout(() => unitInputRef.current?.focus(), 10);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -119,7 +196,7 @@ const App: React.FC = () => {
       setActiveSuggestionIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActiveSuggestionIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      setActiveSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1));
     } else if (e.key === 'Enter') {
       if (activeSuggestionIndex >= 0) {
         e.preventDefault();
@@ -127,6 +204,7 @@ const App: React.FC = () => {
       }
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
+      setActiveSuggestionIndex(-1);
     }
   };
 
@@ -202,10 +280,16 @@ const App: React.FC = () => {
         className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] transition-colors duration-500"
         style={{ color: activeAccent }}
       >
-        Official Resident Portal • Powered by Summit Partnership
+        Official Resident Portal • Powered by Summit Property Management
       </p>
     </div>
   );
+
+  const selectProperty = (p: Property) => {
+    setProperty(p);
+    setStep('plan-select');
+    window.location.hash = `/electricity/apartments/${p.slug}/${p.cityStateSlug}`;
+  };
 
   if (step === 'confirmation' && property) {
     return (
@@ -239,12 +323,18 @@ const App: React.FC = () => {
       <main className="flex-grow">
         {step === 'property-select' && (
           <div className="relative">
-            {/* Summit Inspired Hero Section */}
+            {quickViewProperty && (
+              <QuickViewModal 
+                property={quickViewProperty} 
+                onClose={() => setQuickViewProperty(null)} 
+                onSelect={() => selectProperty(quickViewProperty)}
+              />
+            )}
+
             <div 
-              className="text-white pt-24 pb-40 px-6 relative overflow-hidden transition-colors duration-500"
+              className="text-white pt-24 pb-48 px-6 relative overflow-hidden transition-colors duration-500"
               style={{ backgroundColor: activePrimary }}
             >
-               {/* Background patterns similar to Summit's premium look */}
                <div className="absolute inset-0 opacity-10 pointer-events-none">
                  <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/20 to-transparent"></div>
                </div>
@@ -265,7 +355,7 @@ const App: React.FC = () => {
                   <div className="relative z-50">
                     <form 
                       onSubmit={handleSearch} 
-                      className="flex flex-col md:flex-row items-stretch gap-0 bg-white p-2 rounded-2xl shadow-2xl relative z-30 overflow-hidden"
+                      className="flex flex-col md:flex-row items-stretch gap-0 bg-white p-2 rounded-2xl shadow-[0_30px_80px_-15px_rgba(0,0,0,0.2)] relative z-30 overflow-hidden"
                     >
                       <div className="flex-grow flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100" role="combobox" aria-expanded={showSuggestions} aria-haspopup="listbox" aria-owns="property-suggestions-listbox">
                         <Search className="text-gray-400 mr-5 flex-shrink-0" size={24} />
@@ -279,36 +369,35 @@ const App: React.FC = () => {
                           aria-autocomplete="list"
                           aria-controls="property-suggestions-listbox"
                           aria-activedescendant={activeSuggestionIndex >= 0 ? `suggestion-${activeSuggestionIndex}` : undefined}
-                          placeholder="Property Name or Address..."
+                          placeholder="Search Property Name or Address..."
                           className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
                         />
                       </div>
-                      <div className="w-full md:w-36 flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100">
+                      <div className="w-full md:w-44 flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100">
                         <Home className="text-gray-400 mr-5 flex-shrink-0" size={24} />
                         <input 
                           ref={unitInputRef}
                           type="text"
                           value={unitQuery}
                           onChange={(e) => setUnitQuery(e.target.value)}
-                          placeholder="Unit"
+                          placeholder="Unit #"
                           className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
                         />
                       </div>
                       <button 
                         disabled={isSearching}
-                        className="w-full md:w-auto px-12 py-5 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full md:w-auto px-12 py-5 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                         style={{ backgroundColor: activePrimary }}
                       >
                         {isSearching ? '...' : 'Enroll Now'}
                       </button>
                     </form>
 
-                    {/* Autocomplete Suggestions anchored directly to form */}
                     {showSuggestions && (
                       <div 
                         id="property-suggestions-listbox"
                         role="listbox"
-                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] text-left animate-in fade-in slide-in-from-top-2"
+                        className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-3xl border border-gray-100 overflow-hidden z-[100] text-left animate-in fade-in slide-in-from-top-2"
                       >
                         {suggestions.map((p, index) => (
                           <button
@@ -316,22 +405,27 @@ const App: React.FC = () => {
                             id={`suggestion-${index}`}
                             role="option"
                             aria-selected={index === activeSuggestionIndex}
+                            onMouseEnter={() => setActiveSuggestionIndex(index)}
+                            onMouseLeave={() => setActiveSuggestionIndex(-1)}
                             onClick={() => handleSelectSuggestion(p)}
-                            className={`w-full flex items-center gap-5 px-8 py-5 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${index === activeSuggestionIndex ? 'bg-gray-100' : ''}`}
+                            className={`w-full flex items-center gap-6 px-8 py-6 transition-all border-b border-gray-50 last:border-0 ${
+                              index === activeSuggestionIndex 
+                                ? 'bg-slate-50 ring-1 ring-inset ring-slate-100' 
+                                : 'bg-white'
+                            }`}
                           >
-                            <MapPin size={20} className="text-gray-300" />
+                            <MapPin size={20} className={`${index === activeSuggestionIndex ? 'text-[#c5a059]' : 'text-gray-300'} transition-colors`} />
                             <div>
-                              <p className="font-bold text-[#1a2a44] text-lg">{p.name}</p>
-                              <p className="text-sm text-gray-400 font-medium">{p.address}</p>
+                              <p className={`font-bold text-lg leading-tight mb-1 transition-colors ${index === activeSuggestionIndex ? 'text-[#1a2a44]' : 'text-gray-600'}`}>{p.name}</p>
+                              <p className="text-sm text-gray-400 font-medium tracking-wide">{p.address}</p>
                             </div>
-                            <ChevronRight size={20} className="ml-auto text-gray-200" />
+                            <ChevronRight size={20} className={`ml-auto transition-transform ${index === activeSuggestionIndex ? 'text-[#c5a059] translate-x-1' : 'text-gray-200'}`} />
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  {/* NO-PENALTY ADVOCACY ALERT - Positioned below the anchored search logic */}
                   <div className="mt-16 flex flex-col items-center animate-in fade-in slide-in-from-top-6 duration-1000">
                     <div className="inline-flex flex-col md:flex-row items-center gap-6 px-10 py-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl max-w-3xl mb-6">
                       <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 border border-white/20">
@@ -347,7 +441,6 @@ const App: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    {/* New label requested under the advocacy section */}
                     <div className="flex flex-col items-center">
                       <div 
                         className="w-px h-6 mb-4 opacity-50"
@@ -365,29 +458,46 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Featured Cards - Summit "Find a Home" Grid Style */}
             <div className="max-w-7xl mx-auto px-6 -mt-20 relative z-20">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {availableProperties.slice(0, 12).map((prop) => (
                   <button 
                     key={prop.id}
                     className="bg-white rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group flex flex-col text-left border border-gray-100/50"
-                    onClick={() => {
-                      setProperty(prop);
-                      setStep('plan-select');
-                      window.location.hash = `/electricity/apartments/${prop.slug}/${prop.cityStateSlug}`;
-                    }}
+                    onClick={() => selectProperty(prop)}
                   >
                     <div className="aspect-[4/3] overflow-hidden relative">
                       <img src={prop.image} alt={prop.name} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                      
+                      {/* Rich Hover Overlay with Quick View Trigger */}
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center gap-4">
+                        <div className="flex flex-col items-center gap-2">
+                          <MapPin size={24} style={{ color: activeAccent }} />
+                          <p className="text-white text-[11px] font-black uppercase tracking-widest leading-tight mb-2">
+                            {prop.address}
+                          </p>
+                        </div>
+                        
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickViewProperty(prop);
+                          }}
+                          className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-[#1a2a44] text-[10px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-transform"
+                        >
+                          <Eye size={14} />
+                          Quick View
+                        </div>
+                      </div>
+
                       <div className="absolute top-4 right-4 bg-white/95 px-3 py-1 rounded shadow-sm text-[10px] font-black text-[#1a2a44] uppercase tracking-widest">
                         Summit Managed
                       </div>
                     </div>
                     <div className="p-8">
-                      <h3 className="font-black text-xl text-[#1a2a44] serif group-hover:text-[#c5a059] transition-colors leading-tight mb-2">{prop.name}</h3>
+                      <h3 className="font-black text-xl text-[#1a2a44] serif group-hover:text-[#31686b] transition-colors leading-tight mb-2">{prop.name}</h3>
                       <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-6">{prop.cityStateSlug.replace('-', ', ')}</p>
-                      <div className="flex items-center gap-3 text-[#c5a059] text-xs font-black uppercase tracking-widest pt-4 border-t border-gray-50">
+                      <div className="flex items-center gap-3 text-[#31686b] text-xs font-black uppercase tracking-widest pt-4 border-t border-gray-50">
                         <span>Select Plan</span>
                         <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                       </div>
@@ -400,13 +510,13 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* core value section */}
             <section className="py-32 border-t border-gray-100 bg-white">
-              <div className="max-w-7xl mx-auto px-6">
+              <div className="max-w-7xl mx-auto px-6 text-center">
+                <SummitFullLogo className="mb-20" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
                   <div className="flex flex-col items-center text-center">
                     <div className="w-20 h-20 bg-[#f8f9fa] rounded-full flex items-center justify-center mb-10 border border-gray-100 shadow-sm">
-                      <ShieldCheck size={40} className="text-[#c5a059]" />
+                      <ShieldCheck size={40} className="text-[#31686b]" />
                     </div>
                     <h3 className="text-2xl font-black serif mb-4 text-[#1a2a44] uppercase tracking-tight">Direct Integration</h3>
                     <p className="text-gray-500 leading-relaxed font-light">
@@ -424,7 +534,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex flex-col items-center text-center">
                     <div className="w-20 h-20 bg-[#f8f9fa] rounded-full flex items-center justify-center mb-10 border border-gray-100 shadow-sm">
-                      <Clock size={40} className="text-[#c5a059]" />
+                      <Clock size={40} className="text-[#31686b]" />
                     </div>
                     <h3 className="text-2xl font-black serif mb-4 text-[#1a2a44] uppercase tracking-tight">Day-One Ready</h3>
                     <p className="text-gray-500 leading-relaxed font-light">
@@ -447,7 +557,7 @@ const App: React.FC = () => {
             </button>
 
             <div className="mb-20">
-              <div className="inline-block px-5 py-2 rounded bg-[#c5a059]/10 text-[#c5a059] text-[11px] font-black uppercase tracking-[0.2em] mb-6">
+              <div className="inline-block px-5 py-2 rounded bg-[#31686b]/10 text-[#31686b] text-[11px] font-black uppercase tracking-[0.2em] mb-6">
                 Verified Resident Access: {property.name}
               </div>
               <h2 className="text-5xl md:text-8xl font-black mb-8 serif text-[#1a2a44] tracking-tight leading-none">Choose your rate.</h2>
@@ -531,9 +641,13 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-24 mb-24">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-5 mb-10">
-                <Zap className="text-[#c5a059]" size={48} fill="currentColor" />
-                <span className="text-4xl font-black serif tracking-tighter uppercase">Summit Utilities</span>
+              <div className="flex items-center gap-8 mb-10">
+                <SummitFullLogo color="white" className="!items-start" />
+                <div className="w-px h-12 bg-white/20"></div>
+                <div className="flex flex-col">
+                  <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Powered by</span>
+                  <GetElectricityLogo className="text-white" />
+                </div>
               </div>
               <p className="text-gray-400 text-lg leading-relaxed max-w-xl font-light">
                 Providing seamless utility integration for Summit's premium residential portfolio. Our partnership ensures transparency, advocacy, and exclusive pricing for every resident.
@@ -557,7 +671,7 @@ const App: React.FC = () => {
             </nav>
           </div>
           <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10 text-[11px] text-gray-600 uppercase font-black tracking-[0.4em]">
-            <p>© 2025 Summit Utilities Partnership. Registered REP #10000.</p>
+            <p>© 2025 Summit Property Management Partnership. Registered REP #10000.</p>
             <div className="flex gap-12">
                <span>Data Protection Verified</span>
                <span>Direct Sync Enabled</span>

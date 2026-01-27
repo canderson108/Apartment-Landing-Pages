@@ -9,6 +9,8 @@ export interface Property {
   secondaryColor: string;
   logoUrl?: string;
   accentColor: string;
+  amenities?: string[];
+  description?: string;
 }
 
 export interface ElectricityPlan {
