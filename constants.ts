@@ -33,7 +33,7 @@ export const SUMMIT_PROPERTIES: Property[] = [
     slug: 'the-district-at-greenville',
     cityStateSlug: 'dallas-tx',
     address: '5703 Greenville Ave, Dallas, TX 75206',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000',
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=1000',
     primaryColor: '#1e293b',
     secondaryColor: '#f1f5f9',
     accentColor: '#10b981',
@@ -54,17 +54,17 @@ export const SUMMIT_PROPERTIES: Property[] = [
     description: 'Upscale residential units integrated into the premier LaCenterra shopping and dining complex.'
   },
   {
-    id: 'the-edison',
-    name: 'The Edison',
-    slug: 'the-edison',
+    id: 'the-sterling',
+    name: 'The Sterling',
+    slug: 'the-sterling',
     cityStateSlug: 'dallas-tx',
-    address: '4633 N Central Expy, Dallas, TX 75205',
-    image: 'https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&q=80&w=1000',
+    address: '1445 Ross Ave, Dallas, TX 75202',
+    image: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&q=80&w=1000',
     primaryColor: '#111827',
     secondaryColor: '#f3f4f6',
     accentColor: '#fbbf24',
-    amenities: ['Coworking Spaces', 'Outdoor Kitchens', 'Smart Home Tech', 'Dog Wash'],
-    description: 'Tech-forward apartments designed for the modern professional near the Knox-Henderson area.'
+    amenities: ['Cloud Lounge', 'Private Dining', 'Valet Parking', 'Smart Home Tech'],
+    description: 'Exquisite high-rise living featuring panoramic skyline views and unparalleled luxury services.'
   },
   {
     id: 'broadstone-sienna',
@@ -93,17 +93,17 @@ export const SUMMIT_PROPERTIES: Property[] = [
     description: 'Contemporary apartments with easy access to major employment hubs and recreation.'
   },
   {
-    id: 'parkside-grand-parkway',
-    name: 'Parkside Grand Parkway',
-    slug: 'parkside-grand-parkway',
+    id: 'vue-at-grand-parkway',
+    name: 'Vue at Grand Parkway',
+    slug: 'vue-at-grand-parkway',
     cityStateSlug: 'katy-tx',
-    address: '1226 W Grand Pkwy S, Katy, TX 77494',
-    image: 'https://images.unsplash.com/photo-1448630360428-65426795c64e?auto=format&fit=crop&q=80&w=1000',
+    address: '1222 Grand Pkwy S, Katy, TX 77494',
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=1000',
     primaryColor: '#064e3b',
     secondaryColor: '#f0fdf4',
     accentColor: '#059669',
-    amenities: ['Lap Pool', 'Resident Herb Garden', 'Library', 'Fenced Dog Park'],
-    description: 'Lushly landscaped community offering a peaceful retreat from the city hustle.'
+    amenities: ['Lakeside Trails', 'Modern Gym', 'Co-working Pods', 'Dog Park'],
+    description: 'Modern luxury nestled in a serene lakeside setting with easy access to premier shopping.'
   },
   {
     id: 'villas-west-road',
@@ -150,7 +150,7 @@ export const SUMMIT_PROPERTIES: Property[] = [
     slug: 'sovereign-at-baybrook',
     cityStateSlug: 'houston-tx',
     address: '1910 Sovereign Way, Houston, TX 77089',
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1000',
+    image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000',
     primaryColor: '#1e40af',
     secondaryColor: '#eff6ff',
     accentColor: '#fbbf24',

@@ -21,9 +21,94 @@ import {
   Scale,
   Eye,
   X,
-  Check
+  Check,
+  FileText,
+  AlertTriangle,
+  Scale as ScaleIcon,
+  Gavel,
+  Building2,
+  Users,
+  Send
 } from 'lucide-react';
 import { analyzeUtilityBill } from './services/geminiService';
+
+const PartnerNetworkModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 1500);
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-[#1a2a44]/80 backdrop-blur-md" onClick={onClose}></div>
+      <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-3xl overflow-hidden relative z-10 p-8 md:p-12 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
+        <button onClick={onClose} className="absolute top-8 right-8 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center hover:bg-gray-100">
+          <X size={20} className="text-[#1a2a44]" />
+        </button>
+
+        {!submitted ? (
+          <>
+            <div className="flex items-center gap-3 text-[#c5a059] font-black text-[11px] uppercase tracking-widest mb-6">
+              <Building2 size={18} />
+              <span>Expansion Opportunities</span>
+            </div>
+            <h2 className="text-4xl font-black serif text-[#1a2a44] mb-4 uppercase tracking-tight">Partner with Us.</h2>
+            <p className="text-gray-500 text-lg font-light mb-10 leading-relaxed">
+              Join the network providing seamless utility experiences to over 5,000,000+ residents across the US.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <input required placeholder="Contact Name" className="w-full px-6 py-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-[#c5a059] outline-none transition-all" />
+                <input required placeholder="Company Name" className="w-full px-6 py-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-[#c5a059] outline-none transition-all" />
+              </div>
+              <input required type="email" placeholder="Professional Email" className="w-full px-6 py-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-[#c5a059] outline-none transition-all" />
+              <select className="w-full px-6 py-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-[#c5a059] outline-none transition-all text-gray-400">
+                <option value="">Interest Level</option>
+                <option value="property-management">Property Management Group</option>
+                <option value="vendor">Vendor Partnership</option>
+                <option value="investor">Institutional Investor</option>
+              </select>
+              <textarea placeholder="Tell us about your portfolio..." rows={4} className="w-full px-6 py-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-[#c5a059] outline-none transition-all resize-none" />
+              
+              <button disabled={loading} className="w-full py-5 rounded-xl bg-[#1a2a44] text-white font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:shadow-xl transition-all">
+                {loading ? "Processing..." : (
+                  <>
+                    Submit Partnership Inquiry
+                    <Send size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8">
+              <CheckCircle2 size={48} />
+            </div>
+            <h2 className="text-3xl font-black serif text-[#1a2a44] mb-4">Inquiry Received</h2>
+            <p className="text-gray-500 leading-relaxed mb-10">
+              A partnership director from Summit's strategic utility team will contact you within 48 business hours.
+            </p>
+            <button onClick={onClose} className="px-10 py-4 bg-[#1a2a44] text-white rounded-xl font-bold">Close</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const QuickViewModal: React.FC<{ property: Property; onClose: () => void; onSelect: () => void }> = ({ property, onClose, onSelect }) => {
   useEffect(() => {
@@ -98,6 +183,145 @@ const QuickViewModal: React.FC<{ property: Property; onClose: () => void; onSele
   );
 };
 
+const BlogModal: React.FC<{ type: 'faq' | 'transfer' | 'rights' | 'terms' | 'privacy'; onClose: () => void }> = ({ type, onClose }) => {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-[#1a2a44]/80 backdrop-blur-md" onClick={onClose}></div>
+      <div className="bg-white w-full max-w-3xl rounded-[2.5rem] shadow-3xl overflow-hidden relative z-10 p-8 md:p-16 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500 max-h-[90vh] overflow-y-auto">
+        <button 
+          onClick={onClose}
+          className="absolute top-8 right-8 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+        >
+          <X size={20} className="text-[#1a2a44]" />
+        </button>
+
+        {type === 'faq' && (
+          <article className="prose prose-stone max-w-none">
+            <div className="flex items-center gap-3 text-[#c5a059] font-black text-[11px] uppercase tracking-widest mb-6">
+              <FileText size={18} />
+              <span>Resident Support Center</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black serif text-[#1a2a44] mb-8 leading-tight uppercase tracking-tight">
+              Navigating Your <br/> Utility Move-In.
+            </h2>
+            <div className="space-y-6 text-gray-500 text-lg leading-relaxed font-light">
+              <p>
+                Moving into a new apartment is a whirlwind of logistics, from packing boxes to signing leases. One of the most overlooked hurdles is the "Utility Compliance" requirement. Traditionally, residents had to spend hours researching providers, calling customer service lines, and manually emailing proof of service to their leasing office to avoid hefty administrative fines. This process is prone to error and unnecessary stress.
+              </p>
+              <div className="p-8 bg-[#f8f9fa] rounded-2xl border-l-[4px] border-[#c5a059] my-10">
+                <p className="font-medium text-[#1a2a44] text-xl italic mb-2 serif">The Direct Sync Advantage</p>
+                <p className="text-base">We notify your property manager automatically. No emails, no phone calls, no compliance fees.</p>
+              </div>
+              <p>
+                This is where the GetElectricity and Summit partnership changes the game. By choosing a plan through our verified resident portal, the entire move-in process is automated. The moment you enroll, our system initiates a "Direct Sync" with your property manager.
+              </p>
+              <p>
+                We communicate your account information and start date directly to the leasing office, clearing your compliance status instantly. You don't just get power; you get peace of mind knowing that you won't be surprised by "Utility Non-Compliance" fees on your first month's rent. Our platform ensures that your lights are on and your office is notified, allowing you to focus on what matters most: settling into your beautiful new home.
+              </p>
+            </div>
+          </article>
+        )}
+
+        {type === 'transfer' && (
+          <article className="prose prose-stone max-w-none">
+            <div className="flex items-center gap-3 text-red-500 font-black text-[11px] uppercase tracking-widest mb-6">
+              <AlertTriangle size={18} />
+              <span>Consumer Savings Alert</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black serif text-[#1a2a44] mb-8 leading-tight uppercase tracking-tight">
+              The Costly Mistake <br/> of Service Transfers.
+            </h2>
+            <div className="space-y-6 text-gray-500 text-lg leading-relaxed font-light">
+              <p>
+                When you notify your current Retail Electric Provider (REP) that you are moving, their first instinct is to "transfer" your service to your new address. While they frame this as a convenience, it is often a hidden financial trap for residents. Most existing contracts are based on standard retail rates that don't account for the exclusive bulk-discounting available to Summit Property Management communities.
+              </p>
+              <div className="p-8 bg-red-50 rounded-2xl border-l-[4px] border-red-500 my-10">
+                <p className="font-medium text-red-900 text-xl italic mb-2 serif">Why It Costs You More</p>
+                <p className="text-base text-red-700">Legacy rates are often 15-20% higher than the bulk partnership rates negotiated specifically for Summit properties.</p>
+              </div>
+              <p>
+                By "transferring," you are carrying over a legacy rate that is significantly higher than the partnership rates we’ve negotiated specifically for this building. Furthermore, many REPs use the move as an opportunity to lock you into another long-term contract at their current market price, which lacks the resident-exclusive benefits of our portal.
+              </p>
+              <p>
+                In Texas, you have the legal right to cancel your current contract without penalty when you move (a "Move-Out" event). Choosing to start a new, verified account through GetElectricity allows you to tap into "Preferred Resident" pricing. These rates are specifically designed for the high efficiency and density of our communities. Don't pay for the convenience of a transfer—save money by choosing a plan built for your new home.
+              </p>
+            </div>
+          </article>
+        )}
+
+        {type === 'rights' && (
+          <article className="prose prose-stone max-w-none">
+            <div className="flex items-center gap-3 text-emerald-600 font-black text-[11px] uppercase tracking-widest mb-6">
+              <Gavel size={18} />
+              <span>Consumer Protection Guide</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black serif text-[#1a2a44] mb-8 leading-tight uppercase tracking-tight">
+              Your Rights as a <br/> Texas Electricity Consumer.
+            </h2>
+            <div className="space-y-8 text-gray-500 text-lg leading-relaxed font-light">
+              <section>
+                <h4 className="text-xl font-black text-[#1a2a44] serif italic mb-4">The PUCT Framework</h4>
+                <p>
+                  As a resident in a deregulated area of Texas, your electricity rights are governed by the <strong>Public Utility Commission of Texas (PUCT)</strong> under the <em>Customer Protection Rules (Subchapter R of Chapter 25)</em>. These regulations are designed to ensure transparency, fairness, and safety for all residents.
+                </p>
+              </section>
+              <p>
+                Every resident has the fundamental right to choose their Retail Electric Provider (REP). Under <strong>PUCT Rule §25.475</strong>, providers must disclose all terms of service. Furthermore, one of the most powerful protections for tenants is the <strong>Move-Out Provision</strong>. If you are moving to a new residence, you have the legal right to terminate your current contract without paying an early termination fee.
+              </p>
+              <p>
+                Safety is a priority in the PUCT framework. Providers are prohibited from disconnecting service during an "Extreme Weather Emergency," as defined by the National Weather Service. Additionally, <strong>Rule §25.483</strong> provides critical protections for "Chronic Condition" or "Illness" residents.
+              </p>
+            </div>
+          </article>
+        )}
+
+        {type === 'terms' && (
+          <article className="prose prose-stone max-w-none">
+            <div className="flex items-center gap-3 text-gray-400 font-black text-[11px] uppercase tracking-widest mb-6">
+              <ScaleIcon size={18} />
+              <span>Legal Framework</span>
+            </div>
+            <h2 className="text-4xl font-black serif text-[#1a2a44] mb-8 uppercase tracking-tight">Terms of Service.</h2>
+            <div className="space-y-6 text-gray-500 text-base leading-relaxed">
+              <p>By accessing this resident portal, you agree to the following conditions regarding utility management and lease compliance synchronization.</p>
+              <h4 className="font-bold text-[#1a2a44]">1. Resident Eligibility</h4>
+              <p>The exclusive rates provided through this platform are reserved solely for residents with valid, active lease agreements within properties managed by Summit Property Management. Misrepresentation of resident status may result in account termination and administrative fees.</p>
+              <h4 className="font-bold text-[#1a2a44]">2. Automated Verification</h4>
+              <p>You authorize GetElectricity to communicate your account number, enrollment date, and service status directly to your property's leasing office. This sync is intended to fulfill your lease requirement for utility setup and prevent non-compliance penalties.</p>
+              <h4 className="font-bold text-[#1a2a44]">3. Rate Structures</h4>
+              <p>All electricity rates are fixed for the duration of the term selected. Rates exclude TDU (Transmission and Distribution Utility) delivery charges which are passed through at cost without markup as regulated by the PUCT.</p>
+            </div>
+          </article>
+        )}
+
+        {type === 'privacy' && (
+          <article className="prose prose-stone max-w-none">
+            <div className="flex items-center gap-3 text-gray-400 font-black text-[11px] uppercase tracking-widest mb-6">
+              <Lock size={18} />
+              <span>Data Protection</span>
+            </div>
+            <h2 className="text-4xl font-black serif text-[#1a2a44] mb-8 uppercase tracking-tight">Privacy Policy.</h2>
+            <div className="space-y-6 text-gray-500 text-base leading-relaxed">
+              <p>Your privacy is central to our partnership with Summit. This policy outlines how we handle your residential and energy data.</p>
+              <h4 className="font-bold text-[#1a2a44]">1. Information Collection</h4>
+              <p>We collect your name, unit number, email, and usage data only to facilitate your energy enrollment and verify compliance with your landlord. We do not sell your personal data to third-party marketers.</p>
+              <h4 className="font-bold text-[#1a2a44]">2. Partnership Data Sharing</h4>
+              <p>Specifically, we share your "Active" status and account verification details with Summit Property Management to automate your move-in logistics. This is a secure, encrypted data bridge designed for resident convenience.</p>
+              <h4 className="font-bold text-[#1a2a44]">3. Usage Insights</h4>
+              <p>Usage data collected via bill analysis is used only to generate the savings predictions shown on this platform and is not stored permanently unless you complete an enrollment.</p>
+            </div>
+          </article>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const availableProperties = useMemo(() => 
     SUMMIT_PROPERTIES.filter(p => p.image && p.image.trim() !== ''),
@@ -113,7 +337,10 @@ const App: React.FC = () => {
   const [unitQuery, setUnitQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [unitError, setUnitError] = useState<string | null>(null);
   const [quickViewProperty, setQuickViewProperty] = useState<Property | null>(null);
+  const [activeBlog, setActiveBlog] = useState<'faq' | 'transfer' | 'rights' | 'terms' | 'privacy' | null>(null);
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
   
   const [suggestions, setSuggestions] = useState<Property[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -184,7 +411,7 @@ const App: React.FC = () => {
     setSearchQuery(p.name);
     setShowSuggestions(false);
     setActiveSuggestionIndex(-1);
-    // Focus the unit input after selection
+    setSearchError(null);
     setTimeout(() => unitInputRef.current?.focus(), 10);
   };
 
@@ -211,35 +438,42 @@ const App: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchError(null);
+    setUnitError(null);
     setShowSuggestions(false);
     
-    if (!searchQuery.trim()) {
-      setSearchError("Please enter your home address.");
-      return;
+    const trimmedSearch = searchQuery.trim();
+    const trimmedUnit = unitQuery.trim();
+
+    let hasValidationError = false;
+    
+    if (!trimmedSearch) {
+      setSearchError("Property name is required.");
+      hasValidationError = true;
     }
+    
+    if (!trimmedUnit) {
+      setUnitError("Unit number is required.");
+      hasValidationError = true;
+    }
+
+    if (hasValidationError) return;
     
     setIsSearching(true);
     
     setTimeout(() => {
       const match = availableProperties.find(p => 
-        p.name.toLowerCase() === searchQuery.toLowerCase() || 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        p.address.toLowerCase().includes(searchQuery.toLowerCase())
+        p.name.toLowerCase() === trimmedSearch.toLowerCase() || 
+        p.name.toLowerCase().includes(trimmedSearch.toLowerCase()) || 
+        p.address.toLowerCase().includes(trimmedSearch.toLowerCase())
       );
       
       if (match) {
-        if (!unitQuery.trim()) {
-          setSearchError("Unit number is required for lease synchronization.");
-          setIsSearching(false);
-          unitInputRef.current?.focus();
-          return;
-        }
         setProperty(match);
         setIsSearching(false);
         setStep('plan-select');
         window.location.hash = `/electricity/apartments/${match.slug}/${match.cityStateSlug}`;
       } else {
-        setSearchError("Community not found. This portal is exclusively for residents of communities managed by Summit.");
+        setSearchError("Community not found. Use verified Summit address.");
         setIsSearching(false);
       }
     }, 800);
@@ -268,6 +502,7 @@ const App: React.FC = () => {
     setSearchQuery('');
     setUnitQuery('');
     setSearchError(null);
+    setUnitError(null);
     window.location.hash = '';
   };
 
@@ -302,7 +537,7 @@ const App: React.FC = () => {
             </div>
             <h1 className="text-3xl font-black mb-4 serif text-[#1a2a44]">Lease Verified</h1>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              Your enrollment for <strong>{property.name}</strong>, Unit {unitQuery} is active. We have sent your confirmation directly to the leasing office.
+              Your enrollment for <strong>{property.name}</strong>, Unit {unitQuery.trim()} is active. We have sent your confirmation directly to the leasing office.
             </p>
             <div className="space-y-4">
               <button onClick={resetAll} className="w-full py-4 rounded-lg bg-[#1a2a44] text-white font-bold hover:bg-[#0f1a2e] transition-all">
@@ -331,6 +566,14 @@ const App: React.FC = () => {
               />
             )}
 
+            {activeBlog && (
+              <BlogModal type={activeBlog} onClose={() => setActiveBlog(null)} />
+            )}
+
+            {isPartnerModalOpen && (
+              <PartnerNetworkModal onClose={() => setIsPartnerModalOpen(false)} />
+            )}
+
             <div 
               className="text-white pt-24 pb-48 px-6 relative overflow-hidden transition-colors duration-500"
               style={{ backgroundColor: activePrimary }}
@@ -357,32 +600,52 @@ const App: React.FC = () => {
                       onSubmit={handleSearch} 
                       className="flex flex-col md:flex-row items-stretch gap-0 bg-white p-2 rounded-2xl shadow-[0_30px_80px_-15px_rgba(0,0,0,0.2)] relative z-30 overflow-hidden"
                     >
-                      <div className="flex-grow flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100" role="combobox" aria-expanded={showSuggestions} aria-haspopup="listbox" aria-owns="property-suggestions-listbox">
-                        <Search className="text-gray-400 mr-5 flex-shrink-0" size={24} />
-                        <input 
-                          type="text"
-                          autoComplete="off"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
-                          onKeyDown={handleKeyDown}
-                          aria-autocomplete="list"
-                          aria-controls="property-suggestions-listbox"
-                          aria-activedescendant={activeSuggestionIndex >= 0 ? `suggestion-${activeSuggestionIndex}` : undefined}
-                          placeholder="Search Property Name or Address..."
-                          className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
-                        />
+                      <div className="flex-grow flex flex-col items-start px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100" role="combobox" aria-expanded={showSuggestions} aria-haspopup="listbox" aria-owns="property-suggestions-listbox">
+                        <div className="flex items-center w-full">
+                          <Search className="text-gray-400 mr-5 flex-shrink-0" size={24} />
+                          <input 
+                            type="text"
+                            autoComplete="off"
+                            value={searchQuery}
+                            onChange={(e) => {
+                              setSearchQuery(e.target.value);
+                              if (searchError) setSearchError(null);
+                            }}
+                            onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
+                            onKeyDown={handleKeyDown}
+                            aria-autocomplete="list"
+                            aria-controls="property-suggestions-listbox"
+                            aria-activedescendant={activeSuggestionIndex >= 0 ? `suggestion-${activeSuggestionIndex}` : undefined}
+                            placeholder="Search Property Name or Address..."
+                            className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
+                          />
+                        </div>
+                        {searchError && (
+                          <p className="text-red-500 text-[10px] font-black uppercase tracking-wider mt-1 ml-11 animate-in fade-in slide-in-from-left-1">
+                            {searchError}
+                          </p>
+                        )}
                       </div>
-                      <div className="w-full md:w-44 flex items-center px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100">
-                        <Home className="text-gray-400 mr-5 flex-shrink-0" size={24} />
-                        <input 
-                          ref={unitInputRef}
-                          type="text"
-                          value={unitQuery}
-                          onChange={(e) => setUnitQuery(e.target.value)}
-                          placeholder="Unit #"
-                          className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
-                        />
+                      <div className="w-full md:w-44 flex flex-col items-start px-8 py-4 border-b md:border-b-0 md:border-r border-gray-100">
+                        <div className="flex items-center w-full">
+                          <Home className="text-gray-400 mr-5 flex-shrink-0" size={24} />
+                          <input 
+                            ref={unitInputRef}
+                            type="text"
+                            value={unitQuery}
+                            onChange={(e) => {
+                              setUnitQuery(e.target.value);
+                              if (unitError) setUnitError(null);
+                            }}
+                            placeholder="Unit #"
+                            className="w-full py-2 text-[#1a2a44] text-xl font-medium outline-none placeholder:text-gray-300 bg-transparent"
+                          />
+                        </div>
+                        {unitError && (
+                          <p className="text-red-500 text-[10px] font-black uppercase tracking-wider mt-1 ml-11 animate-in fade-in slide-in-from-left-1">
+                            {unitError}
+                          </p>
+                        )}
                       </div>
                       <button 
                         disabled={isSearching}
@@ -450,7 +713,7 @@ const App: React.FC = () => {
                         className="text-[10px] md:text-xs font-black uppercase tracking-[0.5em] opacity-80 animate-pulse"
                         style={{ color: activeAccent }}
                       >
-                        All Summit Managed Properties
+                        Other Summit Managed Properties
                       </p>
                     </div>
                   </div>
@@ -469,7 +732,6 @@ const App: React.FC = () => {
                     <div className="aspect-[4/3] overflow-hidden relative">
                       <img src={prop.image} alt={prop.name} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
                       
-                      {/* Rich Hover Overlay with Quick View Trigger */}
                       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center gap-4">
                         <div className="flex flex-col items-center gap-2">
                           <MapPin size={24} style={{ color: activeAccent }} />
@@ -504,9 +766,6 @@ const App: React.FC = () => {
                     </div>
                   </button>
                 ))}
-              </div>
-              <div className="mt-20 text-center">
-                 <p className="text-gray-400 text-[12px] font-black uppercase tracking-[0.4em] mb-20">Browse All {availableProperties.length} Summit Managed Communities</p>
               </div>
             </div>
 
@@ -656,22 +915,23 @@ const App: React.FC = () => {
             <nav>
               <h4 className="font-black text-[11px] text-gray-200 uppercase tracking-[0.3em] mb-12">Resident Support</h4>
               <ul className="space-y-6 text-gray-400 text-base font-medium">
-                <li><a href="#" className="hover:text-[#c5a059] transition-colors">Move-in FAQ</a></li>
-                <li><a href="#" className="hover:text-[#c5a059] transition-colors">Transfer Service</a></li>
-                <li><a href="#" className="hover:text-[#c5a059] transition-colors">Know Your Rights</a></li>
+                <li><button onClick={() => setActiveBlog('faq')} className="hover:text-[#c5a059] transition-colors text-left">Move-in FAQ</button></li>
+                <li><button onClick={() => setActiveBlog('transfer')} className="hover:text-[#c5a059] transition-colors text-left">Transfer Service</button></li>
+                <li><button onClick={() => setActiveBlog('rights')} className="hover:text-[#c5a059] transition-colors text-left">Know Your Rights</button></li>
+                <li><button onClick={() => setActiveBlog('terms')} className="hover:text-[#c5a059] transition-colors text-left">Terms of Service</button></li>
+                <li><button onClick={() => setActiveBlog('privacy')} className="hover:text-[#c5a059] transition-colors text-left">Privacy Policy</button></li>
               </ul>
             </nav>
             <nav>
               <h4 className="font-black text-[11px] text-gray-200 uppercase tracking-[0.3em] mb-12">Management</h4>
               <ul className="space-y-6 text-gray-400 text-base font-medium">
-                <li><a href="#" className="hover:text-[#c5a059] transition-colors">Summit Portfolio</a></li>
-                <li><a href="#" className="hover:text-[#c5a059] transition-colors">Partner Network</a></li>
-                <li><a href="#" className="hover:text-[#c5a059] transition-colors">Portal Access</a></li>
+                <li><a href="https://www.summitapm.com/" target="_blank" rel="noopener noreferrer" className="hover:text-[#c5a059] transition-colors">Summit Portfolio</a></li>
+                <li><button onClick={() => setIsPartnerModalOpen(true)} className="hover:text-[#c5a059] transition-colors text-left">Partner Network</button></li>
               </ul>
             </nav>
           </div>
           <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10 text-[11px] text-gray-600 uppercase font-black tracking-[0.4em]">
-            <p>© 2025 Summit Property Management Partnership. Registered REP #10000.</p>
+            <p>© 2025 Summit Property Management Partnership. Registered BRBR230243.</p>
             <div className="flex gap-12">
                <span>Data Protection Verified</span>
                <span>Direct Sync Enabled</span>
