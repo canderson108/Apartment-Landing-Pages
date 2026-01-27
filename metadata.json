@@ -1,0 +1,7 @@
+{
+  "name": "Sentinel Landing Pages",
+  "description": "The official resident utility portal for Summit Property Management communities. Enroll in discounted electricity plans with automatic fee-waiver synchronization.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
