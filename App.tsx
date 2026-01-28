@@ -482,12 +482,13 @@ const App: React.FC = () => {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && selectedPlan) {
       setIsAnalyzing(true);
       const reader = new FileReader();
+      const mimeType = file.type;
       reader.onloadend = async () => {
         const base64String = (reader.result as string).split(',')[1];
-        const result = await analyzeUtilityBill(base64String);
+        const result = await analyzeUtilityBill(base64String, mimeType, selectedPlan.rate);
         setAnalysis(result);
         setIsAnalyzing(false);
       };
@@ -505,6 +506,17 @@ const App: React.FC = () => {
     setSearchError(null);
     setUnitError(null);
     window.location.hash = '';
+  };
+
+  const renderFormattedText = (text: string) => {
+    // Simple markdown-style bold renderer splitting by **
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="font-black text-[#1a2a44]">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
   };
 
   const TopLine = () => (
@@ -850,47 +862,66 @@ const App: React.FC = () => {
                       setStep('details');
                     } else {
                       setSelectedPlan(plan);
+                      setAnalysis(null); // Clear previous analysis when plan changes to ensure fresh comparison
                     }
                   }}
                 />
               ))}
             </div>
 
-            <div className="bg-white border border-gray-100 rounded-3xl shadow-2xl p-12 flex flex-col md:flex-row items-center gap-16">
+            <div className={`bg-white border border-gray-100 rounded-3xl shadow-2xl p-12 flex flex-col md:flex-row items-center gap-16 transition-opacity duration-300 ${!selectedPlan ? 'opacity-60' : 'opacity-100'}`}>
               <div className="flex-grow">
                 <div className="flex items-center gap-3 text-[#c5a059] font-black text-[11px] uppercase tracking-widest mb-6">
                   <Sparkles size={20} />
                   <span>AI Savings Predictor</span>
                 </div>
                 <h3 className="text-4xl font-black mb-6 serif text-[#1a2a44] leading-tight uppercase tracking-tight">Compare your current bill.</h3>
-                <p className="text-gray-500 mb-10 text-lg leading-relaxed max-w-xl">Upload your most recent bill and our AI will automatically calculate your monthly savings at {property.name}.</p>
-                <input type="file" id="bill-upload" className="hidden" accept="image/*" onChange={handleFileUpload} />
-                <label 
-                  htmlFor="bill-upload"
-                  className="inline-flex items-center gap-4 py-5 px-12 bg-[#1a2a44] text-white rounded-xl font-black text-sm uppercase tracking-widest cursor-pointer transition-all hover:bg-[#0f1a2e] shadow-xl"
-                >
-                  {isAnalyzing ? "Analyzing Data..." : "Analyze Current Bill"}
-                </label>
+                <p className="text-gray-500 mb-10 text-lg leading-relaxed max-w-xl">
+                  {selectedPlan 
+                    ? `Upload your most recent bill and our AI will automatically calculate your monthly savings at ${property.name} based on the ${selectedPlan.name}.`
+                    : `Please select an electricity plan above first to enable the savings comparison tool.`
+                  }
+                </p>
+                
+                {!analysis ? (
+                  <>
+                    <input 
+                      type="file" 
+                      id="bill-upload" 
+                      className="hidden" 
+                      accept="image/*,application/pdf" 
+                      onChange={handleFileUpload}
+                      disabled={!selectedPlan || isAnalyzing}
+                    />
+                    <label 
+                      htmlFor={!selectedPlan || isAnalyzing ? undefined : "bill-upload"}
+                      className={`inline-flex items-center gap-4 py-5 px-12 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-xl ${
+                        !selectedPlan 
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                          : 'bg-[#1a2a44] text-white hover:bg-[#0f1a2e] cursor-pointer'
+                      }`}
+                    >
+                      {isAnalyzing ? "Analyzing Data..." : !selectedPlan ? "Select Plan First" : "Analyze Current Bill"}
+                    </label>
+                  </>
+                ) : (
+                  <button 
+                    onClick={() => setStep('details')}
+                    className="inline-flex items-center gap-4 py-5 px-12 bg-emerald-600 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all hover:bg-emerald-700 shadow-xl group"
+                  >
+                    Enroll and Start Saving
+                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                )}
               </div>
               {analysis && (
-                <div className="md:w-1/2 p-10 bg-[#f8f9fa] rounded-2xl border border-gray-100">
-                  <p className="text-lg font-medium text-gray-700 italic leading-relaxed">"{analysis}"</p>
+                <div className="md:w-1/2 p-10 bg-[#f8f9fa] rounded-2xl border border-gray-100 animate-in fade-in slide-in-from-right-4 duration-500">
+                  <p className="text-lg font-medium text-gray-700 italic leading-relaxed">
+                    {renderFormattedText(analysis)}
+                  </p>
                 </div>
               )}
             </div>
-
-            {selectedPlan && (
-              <div className="mt-20 flex justify-end">
-                <button 
-                  onClick={() => setStep('details')}
-                  className="py-6 px-20 rounded-xl text-white font-black text-lg uppercase tracking-widest shadow-2xl transition-all flex items-center gap-5"
-                  style={{ backgroundColor: property.primaryColor }}
-                >
-                  Enroll and Notify Office
-                  <ChevronRight size={28} />
-                </button>
-              </div>
-            )}
           </div>
         )}
 
