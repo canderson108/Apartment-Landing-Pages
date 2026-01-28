@@ -161,28 +161,28 @@ export const SUMMIT_PROPERTIES: Property[] = [
 
 export const PLANS: ElectricityPlan[] = [
   {
-    id: 'resident-exclusive',
-    name: 'Resident Exclusive Fixed',
+    id: 'studio-one-bdr',
+    name: 'Studio & One-Bedroom Plan',
     rate: 9.8,
     term: 12,
     renewable: 100,
     features: [
-      'Summit Compliance Verified',
+      'Optimized for Lower Usage Volumes',
       'Move-in Fees Waived Automatically',
       'Official Property Syncing',
-      'Administrative Fee Waiver'
+      'Renewable Energy Sourcing'
     ]
   },
   {
-    id: 'preferred-resident',
-    name: 'Preferred Community Plan',
-    rate: 10.5,
-    term: 24,
-    renewable: 50,
+    id: 'multi-bdr-exclusive',
+    name: 'Multi-Bedroom Suite (2-4 Bdr)',
+    rate: 9.2,
+    term: 12,
+    renewable: 100,
     features: [
-      '24-Month Price Stability',
+      'Bulk Volume Rate Discount',
       'Direct Leasing Office Notification',
-      'Bulk Rate Resident Discount',
+      'High-Efficiency Appliance Savings',
       'Summit Compliance Verified'
     ]
   }

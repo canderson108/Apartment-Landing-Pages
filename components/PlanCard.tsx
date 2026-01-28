@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ElectricityPlan, Property } from '../types';
 import { Check, Leaf } from 'lucide-react';
@@ -70,7 +69,7 @@ const PlanCard: React.FC<Props> = ({ plan, property, isSelected, onSelect }) => 
           borderColor: isSelected ? 'transparent' : '#e2e8f0'
         }}
       >
-        {isSelected ? 'Ready to Enroll' : 'Select Plan'}
+        {isSelected ? 'Enroll and Notify Office' : 'Select Plan'}
       </button>
     </div>
   );

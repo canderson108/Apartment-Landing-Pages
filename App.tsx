@@ -28,7 +28,8 @@ import {
   Gavel,
   Building2,
   Users,
-  Send
+  Send,
+  Info
 } from 'lucide-react';
 import { analyzeUtilityBill } from './services/geminiService';
 
@@ -820,9 +821,21 @@ const App: React.FC = () => {
                 Verified Resident Access: {property.name}
               </div>
               <h2 className="text-5xl md:text-8xl font-black mb-8 serif text-[#1a2a44] tracking-tight leading-none">Choose your rate.</h2>
-              <p className="text-gray-500 text-xl font-light max-w-3xl leading-relaxed">
+              <p className="text-gray-500 text-xl font-light max-w-3xl leading-relaxed mb-8">
                 Select from exclusive resident-only plans. These rates are locked in through our partnership with Summit and are not available to the general public.
               </p>
+              
+              <div className="flex items-start gap-4 p-6 bg-amber-50 rounded-2xl border border-amber-100 max-w-3xl">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Info className="text-amber-700" size={20} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-amber-900 mb-1">Choosing the right plan for your unit:</p>
+                  <p className="text-sm text-amber-800 leading-relaxed">
+                    Electricity usage profiles vary significantly based on your unit's square footage and the number of tenants. Larger units with more occupants typically consume more kWh monthly. Selecting the plan that matches your bedroom count ensures you benefit from the volume tier most appropriate for your lifestyle.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-24">
@@ -832,7 +845,13 @@ const App: React.FC = () => {
                   plan={plan}
                   property={property}
                   isSelected={selectedPlan?.id === plan.id}
-                  onSelect={() => setSelectedPlan(plan)}
+                  onSelect={() => {
+                    if (selectedPlan?.id === plan.id) {
+                      setStep('details');
+                    } else {
+                      setSelectedPlan(plan);
+                    }
+                  }}
                 />
               ))}
             </div>
